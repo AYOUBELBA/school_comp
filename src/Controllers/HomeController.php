@@ -62,9 +62,10 @@ class HomeController extends Controller
         }
         
         $this->view('home/index', [
-            'featuredProducts' => $featuredProducts,
-            'latestProducts' => $latestProducts,
-            'categories' => $categories
-        ]);
+        'featuredProducts' => $featuredProducts,
+        'latestProducts' => $latestProducts,
+        'categories' => $categories,
+        'currentPage' => 'home'
+    ]);
     }
 }

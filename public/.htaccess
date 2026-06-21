@@ -1,0 +1,17 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Allow direct access to assets
+    RewriteCond %{REQUEST_URI} !^/assets/
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
+</IfModule>
+
+# Allow access to assets
+<FilesMatch "\.(css|js|jpg|jpeg|png|gif|svg|ico|webp)$">
+    Order allow,deny
+    Allow from all
+</FilesMatch>
+
+Options -Indexes

@@ -1,172 +1,135 @@
 <?php
 // views/home/index.php
 
-// Ensure variables are arrays
 $featuredProducts = $featuredProducts ?? [];
 $latestProducts = $latestProducts ?? [];
 $categories = $categories ?? [];
+$currentPage = 'home';
 ?>
 
-<div class="container">
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="hero-content">
-            <h1>Welcome to MarketPlace</h1>
-            <p>Buy and sell used items with real-time chat and offers</p>
-            <div class="hero-actions">
-                <a href="/products" class="btn btn-primary">Browse Products</a>
-                <?php if (!isset($_SESSION['user_id'])): ?>
-                    <a href="/register" class="btn btn-secondary">Start Selling</a>
-                <?php endif; ?>
-            </div>
+<!-- Hero Section -->
+<section class="hero-modern animate-fade-in">
+    <div class="hero-content">
+        <h1>Give goods a second life.</h1>
+        <p>ReCircle is the premium marketplace for conscious consumers to buy and sell pre-loved items.</p>
+        <div class="hero-buttons">
+            <a href="/products" class="btn-hero-primary">Shop Now</a>
+            <?php if (!isset($_SESSION['user_id'])): ?>
+                <a href="/register" class="btn-hero-secondary">Start Selling</a>
+            <?php endif; ?>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- Categories -->
+<!-- Categories -->
+<section>
+    <div class="section-header">
+        <h2>Shop by Category</h2>
+        <a href="/categories">View All →</a>
+    </div>
+    
     <?php if (!empty($categories)): ?>
-    <section class="categories-section">
-        <h2>Browse Categories</h2>
-        <div class="category-grid">
-            <?php foreach ($categories as $category): ?>
-                <a href="/products?category=<?php echo $category['id']; ?>" class="category-card">
-                    <h3><?php echo htmlspecialchars($category['name']); ?></h3>
-                    <p><?php echo htmlspecialchars($category['description'] ?? ''); ?></p>
+        <div class="category-grid-modern">
+            <?php 
+            $categoryIcons = [
+                'Electronics' => '📱',
+                'Clothing' => '👕',
+                'Furniture' => '🪑',
+                'Books' => '📚',
+                'Sports' => '⚽',
+                'Collectibles' => '🎯',
+                'Vehicles' => '🚗',
+                'Garden & Plants' => '🌱',
+                'Toys & Games' => '🎮'
+            ];
+            foreach ($categories as $category): 
+            ?>
+                <a href="/products?category=<?php echo $category['id']; ?>" class="category-card-modern">
+                    <div class="category-icon"><?php echo $categoryIcons[$category['name']] ?? '📦'; ?></div>
+                    <div class="category-name"><?php echo htmlspecialchars($category['name']); ?></div>
                 </a>
             <?php endforeach; ?>
         </div>
-    </section>
     <?php endif; ?>
+</section>
 
-    <!-- Featured Products -->
-    <?php if (!empty($featuredProducts)): ?>
-    <section class="featured-section">
-        <h2>🌟 Featured Products</h2>
-        <div class="product-grid">
-            <?php foreach ($featuredProducts as $product): ?>
-                <div class="product-card" onclick="window.location='/product/<?php echo $product['id']; ?>'">
-                    <?php if (!empty($product['primary_image'])): ?>
-                        <img src="/uploads/products/<?php echo htmlspecialchars($product['primary_image']); ?>" 
-                             alt="<?php echo htmlspecialchars($product['title']); ?>" 
-                             class="product-image">
-                    <?php else: ?>
-                        <div class="product-image placeholder">No Image</div>
-                    <?php endif; ?>
-                    <div class="product-info">
-                        <h3 class="product-title"><?php echo htmlspecialchars($product['title']); ?></h3>
-                        <div class="product-price">$<?php echo number_format($product['price'], 2); ?></div>
-                        <div class="product-seller">by <?php echo htmlspecialchars($product['seller_name'] ?? 'Unknown'); ?></div>
-                        <span class="product-condition"><?php echo ucfirst($product['condition'] ?? 'used'); ?></span>
+<!-- Featured Products -->
+<?php if (!empty($featuredProducts)): ?>
+<section>
+    <div class="section-header">
+        <h2>🌟 Featured Listings</h2>
+        <a href="/products">View All →</a>
+    </div>
+    
+    <div class="product-grid-modern">
+        <?php foreach ($featuredProducts as $product): ?>
+            <div class="product-card-modern" onclick="window.location='/product/<?php echo $product['id']; ?>'">
+                <?php if (!empty($product['primary_image'])): ?>
+                    <img src="/uploads/products/<?php echo htmlspecialchars($product['primary_image']); ?>" 
+                         alt="<?php echo htmlspecialchars($product['title']); ?>" 
+                         class="product-image-modern">
+                <?php else: ?>
+                    <div class="product-image-modern" style="display:flex;align-items:center;justify-content:center;color:var(--gray-400);">
+                        No Image
+                    </div>
+                <?php endif; ?>
+                <div class="product-info-modern">
+                    <div class="product-title-modern"><?php echo htmlspecialchars($product['title']); ?></div>
+                    <div class="product-price-modern">$<?php echo number_format($product['price'], 2); ?></div>
+                    <div class="product-meta-modern">
+                        <span><?php echo htmlspecialchars($product['seller_name'] ?? 'Unknown'); ?></span>
+                        <span class="badge badge-success"><?php echo ucfirst($product['condition'] ?? 'used'); ?></span>
                     </div>
                 </div>
-            <?php endforeach; ?>
-        </div>
-    </section>
-    <?php endif; ?>
+            </div>
+        <?php endforeach; ?>
+    </div>
+</section>
+<?php endif; ?>
 
-    <!-- Latest Products -->
-    <?php if (!empty($latestProducts)): ?>
-    <section class="latest-section">
+<!-- Latest Products -->
+<?php if (!empty($latestProducts)): ?>
+<section>
+    <div class="section-header">
         <h2>🆕 Latest Listings</h2>
-        <div class="product-grid">
-            <?php foreach ($latestProducts as $product): ?>
-                <div class="product-card" onclick="window.location='/product/<?php echo $product['id']; ?>'">
-                    <?php if (!empty($product['primary_image'])): ?>
-                        <img src="/uploads/products/<?php echo htmlspecialchars($product['primary_image']); ?>" 
-                             alt="<?php echo htmlspecialchars($product['title']); ?>" 
-                             class="product-image">
-                    <?php else: ?>
-                        <div class="product-image placeholder">No Image</div>
-                    <?php endif; ?>
-                    <div class="product-info">
-                        <h3 class="product-title"><?php echo htmlspecialchars($product['title']); ?></h3>
-                        <div class="product-price">$<?php echo number_format($product['price'], 2); ?></div>
-                        <div class="product-seller">by <?php echo htmlspecialchars($product['seller_name'] ?? 'Unknown'); ?></div>
-                        <span class="product-condition"><?php echo ucfirst($product['condition'] ?? 'used'); ?></span>
+        <a href="/products">View All →</a>
+    </div>
+    
+    <div class="product-grid-modern">
+        <?php foreach ($latestProducts as $product): ?>
+            <div class="product-card-modern" onclick="window.location='/product/<?php echo $product['id']; ?>'">
+                <?php if (!empty($product['primary_image'])): ?>
+                    <img src="/uploads/products/<?php echo htmlspecialchars($product['primary_image']); ?>" 
+                         alt="<?php echo htmlspecialchars($product['title']); ?>" 
+                         class="product-image-modern">
+                <?php else: ?>
+                    <div class="product-image-modern" style="display:flex;align-items:center;justify-content:center;color:var(--gray-400);">
+                        No Image
+                    </div>
+                <?php endif; ?>
+                <div class="product-info-modern">
+                    <div class="product-title-modern"><?php echo htmlspecialchars($product['title']); ?></div>
+                    <div class="product-price-modern">$<?php echo number_format($product['price'], 2); ?></div>
+                    <div class="product-meta-modern">
+                        <span><?php echo htmlspecialchars($product['seller_name'] ?? 'Unknown'); ?></span>
+                        <span class="badge badge-success"><?php echo ucfirst($product['condition'] ?? 'used'); ?></span>
                     </div>
                 </div>
-            <?php endforeach; ?>
-        </div>
-    </section>
+            </div>
+        <?php endforeach; ?>
+    </div>
+</section>
+<?php endif; ?>
+
+<!-- Empty State -->
+<?php if (empty($featuredProducts) && empty($latestProducts)): ?>
+<section class="text-center" style="padding:var(--space-2xl) 0;">
+    <h2 style="margin-bottom:var(--space-md);">Welcome to ReCircle!</h2>
+    <p style="color:var(--gray-500);margin-bottom:var(--space-lg);">No products available yet. Be the first to list an item!</p>
+    <?php if (isset($_SESSION['user_id'])): ?>
+        <a href="/product/create" class="btn-modern btn-modern-primary">Create Listing</a>
+    <?php else: ?>
+        <a href="/register" class="btn-modern btn-modern-primary">Start Selling</a>
     <?php endif; ?>
-
-    <?php if (empty($featuredProducts) && empty($latestProducts)): ?>
-    <section class="empty-state">
-        <h2>Welcome to Marketplace!</h2>
-        <p>No products available yet. Be the first to list an item!</p>
-        <?php if (isset($_SESSION['user_id'])): ?>
-            <a href="/product/create" class="btn btn-primary">Create Listing</a>
-        <?php else: ?>
-            <a href="/register" class="btn btn-primary">Register to Start Selling</a>
-        <?php endif; ?>
-    </section>
-    <?php endif; ?>
-</div>
-
-<style>
-.hero {
-    text-align: center;
-    padding: 60px 0;
-    background: linear-gradient(135deg, #0654ba 0%, #004b9a 100%);
-    color: white;
-    border-radius: 12px;
-    margin: 20px 0;
-}
-
-.hero h1 {
-    font-size: 48px;
-    margin-bottom: 12px;
-}
-
-.hero p {
-    font-size: 20px;
-    opacity: 0.9;
-}
-
-.categories {
-    margin: 40px 0;
-}
-
-.category-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 16px;
-    margin-top: 16px;
-}
-
-.category-card {
-    background: white;
-    padding: 20px;
-    text-align: center;
-    border-radius: 8px;
-    text-decoration: none;
-    color: #333;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    transition: transform 0.2s;
-}
-
-.category-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-
-.category-card h3 {
-    font-size: 16px;
-    margin: 0;
-}
-
-.featured-products, .latest-products {
-    margin: 40px 0;
-}
-
-.featured-products h2, .latest-products h2 {
-    margin-bottom: 20px;
-}
-
-.placeholder {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #f0f0f0;
-    color: #999;
-}
-</style>
+</section>
+<?php endif; ?>

@@ -35,14 +35,17 @@ class ProductController extends Controller
         $searchService = new SearchService();
         $result = $searchService->search($_GET, $limit, $offset);
         
+        
         $this->view('products/listing', [
             'products' => $result['products'],
             'total' => $result['total'],
             'page' => $page,
             'limit' => $limit,
-            'filters' => $_GET
+            'filters' => $_GET,
+            'currentPage' => 'products'
         ]);
     }
+
     
     public function show($id)
     {
@@ -92,12 +95,13 @@ class ProductController extends Controller
                 $isFavorited = (bool)$favorite;
             }
             
-            $this->view('products/details', [
-                'product' => $product,
-                'images' => $images,
-                'similar' => $similar,
-                'isFavorited' => $isFavorited
-            ]);
+                $this->view('products/details', [
+        'product' => $product,
+        'images' => $images,
+        'similar' => $similar,
+        'isFavorited' => $isFavorited,
+        'currentPage' => 'products'
+    ]);
             
         } catch (\Exception $e) {
             return $this->redirect('/products', ['error' => 'Product not found']);
@@ -230,27 +234,55 @@ class ProductController extends Controller
         return $this->redirect('/product/' . $id, ['success' => 'Product updated successfully!']);
     }
     
-    public function delete($id)
-    {
-        Auth::requireRole('seller');
-        
-        $product = $this->db->fetch(
-            "SELECT id FROM products WHERE id = ? AND seller_id = ?",
-            [$id, Auth::getUserId()]
-        );
-        
-        if (!$product) {
+public function delete($id)
+{
+    // Check if user is logged in
+    Auth::requireLogin();
+    
+    $user = Auth::getUser();
+    $userId = Auth::getUserId();
+    
+    // Get product details
+    $product = $this->db->fetch(
+        "SELECT id, seller_id, title FROM products WHERE id = ?",
+        [$id]
+    );
+    
+    if (!$product) {
+        if ($this->isAjax()) {
             return $this->json(['error' => 'Product not found'], 404);
         }
         
-        $this->db->delete('products', 'id = ?', [$id]);
-        
-        if ($this->isAjax()) {
-            return $this->json(['success' => true]);
+        // Check where to redirect based on user role
+        if ($user['role'] === 'admin') {
+            return $this->redirect('/admin/products', ['error' => 'Product not found']);
+        } else {
+            return $this->redirect('/dashboard/seller', ['error' => 'Product not found']);
         }
-        
+    }
+    
+    // Check if user is the seller OR admin
+    if ($user['role'] !== 'admin' && $product['seller_id'] != $userId) {
+        if ($this->isAjax()) {
+            return $this->json(['error' => 'Unauthorized'], 403);
+        }
+        return $this->redirect('/');
+    }
+    
+    // Delete product (cascade will delete images too)
+    $this->db->delete('products', 'id = ?', [$id]);
+    
+    if ($this->isAjax()) {
+        return $this->json(['success' => true]);
+    }
+    
+    // Redirect based on user role
+    if ($user['role'] === 'admin') {
+        return $this->redirect('/admin/products', ['success' => 'Product deleted successfully!']);
+    } else {
         return $this->redirect('/dashboard/seller', ['success' => 'Product deleted successfully!']);
     }
+}
     
     public function toggleFavorite($id)
     {

@@ -2,145 +2,241 @@
 // views/auth/login.php
 ?>
 
-<div class="auth-container">
-    <div class="auth-box">
-        <h1>Login to MarketPlace</h1>
-        
-        <?php if (isset($_SESSION['flash']['error'])): ?>
-            <div class="alert alert-error">
-                <?php echo htmlspecialchars($_SESSION['flash']['error']); ?>
-                <?php unset($_SESSION['flash']['error']); ?>
-            </div>
-        <?php endif; ?>
-        
-        <form action="/authenticate" method="POST">
-            <div class="form-group">
-                <label for="email">Email Address</label>
-                <input type="email" id="email" name="email" class="form-control" required>
+<div class="auth-page">
+    <div class="auth-container-modern">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="auth-icon">♻️</div>
+                <h1>Welcome Back</h1>
+                <p>Sign in to continue your sustainable journey</p>
             </div>
             
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" class="form-control" required>
+            <?php if (isset($_SESSION['flash']['error'])): ?>
+                <div class="alert alert-error">
+                    <?php echo htmlspecialchars($_SESSION['flash']['error']); ?>
+                    <?php unset($_SESSION['flash']['error']); ?>
+                </div>
+            <?php endif; ?>
+            
+            <?php if (isset($_SESSION['flash']['success'])): ?>
+                <div class="alert alert-success">
+                    <?php echo htmlspecialchars($_SESSION['flash']['success']); ?>
+                    <?php unset($_SESSION['flash']['success']); ?>
+                </div>
+            <?php endif; ?>
+            
+            <form action="/authenticate" method="POST" class="auth-form">
+                <div class="form-group-modern">
+                    <label>Email Address</label>
+                    <input type="email" name="email" required placeholder="you@example.com">
+                </div>
+                
+                <div class="form-group-modern">
+                    <label>Password</label>
+                    <input type="password" name="password" required placeholder="Enter your password">
+                </div>
+                
+                <button type="submit" class="btn-auth-primary">Sign In</button>
+            </form>
+            
+            <div class="auth-footer">
+                Don't have an account? <a href="/register">Sign up</a>
             </div>
             
-            <button type="submit" class="btn btn-primary btn-block">Login</button>
-        </form>
-        
-        <p class="auth-links">
-            Don't have an account? <a href="/register">Register here</a>
-        </p>
+            <div class="demo-accounts">
+                <p><strong>Demo Accounts:</strong></p>
+                <div class="demo-grid">
+                    <div><strong>Admin:</strong> admin@marketplace.com<br><span>admin123</span></div>
+                    <div><strong>Seller:</strong> seller@marketplace.com<br><span>seller123</span></div>
+                    <div><strong>Buyer:</strong> buyer@marketplace.com<br><span>buyer123</span></div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
 <style>
-.auth-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+/* Auth Page Styles */
+.auth-page {
     min-height: 80vh;
-    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-xl) var(--space-md);
+    background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
 }
 
-.auth-box {
-    background: white;
-    padding: 40px;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    max-width: 400px;
+.auth-container-modern {
     width: 100%;
+    max-width: 440px;
+    animation: fadeInUp 0.6s ease-out;
 }
 
-.auth-box h1 {
-    margin-bottom: 24px;
+.auth-card {
+    background: var(--white);
+    border-radius: var(--border-radius-xl);
+    padding: var(--space-2xl);
+    box-shadow: var(--shadow-xl);
+}
+
+.auth-header {
     text-align: center;
-    color: #333;
+    margin-bottom: var(--space-xl);
 }
 
-.form-group {
-    margin-bottom: 20px;
+.auth-icon {
+    font-size: 48px;
+    margin-bottom: var(--space-sm);
 }
 
-.form-group label {
-    display: block;
-    margin-bottom: 6px;
-    font-weight: 500;
-    color: #555;
+.auth-header h1 {
+    font-size: var(--font-size-2xl);
+    font-weight: 800;
+    margin-bottom: var(--space-xs);
+    color: var(--gray-800);
 }
 
-.form-control {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    font-size: 16px;
-    transition: border-color 0.3s;
-}
-
-.form-control:focus {
-    outline: none;
-    border-color: #0654ba;
-}
-
-.btn {
-    padding: 12px 24px;
-    border: none;
-    border-radius: 6px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-.btn-primary {
-    background: #0654ba;
-    color: white;
-    width: 100%;
-}
-
-.btn-primary:hover {
-    background: #004b9a;
-}
-
-.btn-block {
-    width: 100%;
-}
-
-.auth-links {
-    text-align: center;
-    margin-top: 20px;
-    color: #666;
-}
-
-.auth-links a {
-    color: #0654ba;
-    text-decoration: none;
-}
-
-.auth-links a:hover {
-    text-decoration: underline;
-}
-
-.demo-credentials {
-    margin-top: 20px;
-    padding: 16px;
-    background: #f8f9fa;
-    border-radius: 6px;
-    font-size: 14px;
-}
-
-.demo-credentials p {
-    margin: 4px 0;
+.auth-header p {
+    color: var(--gray-500);
+    font-size: var(--font-size-sm);
 }
 
 .alert {
-    padding: 12px 16px;
-    border-radius: 6px;
-    margin-bottom: 16px;
+    padding: var(--space-md) var(--space-lg);
+    border-radius: var(--border-radius-md);
+    margin-bottom: var(--space-lg);
+    font-size: var(--font-size-sm);
 }
 
 .alert-error {
-    background: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
+    background: #FED7D7;
+    color: #742A2A;
+    border: 1px solid #FECACA;
+}
+
+.alert-success {
+    background: #C6F6D5;
+    color: #22543D;
+    border: 1px solid #9AE6B4;
+}
+
+.auth-form .form-group-modern {
+    margin-bottom: var(--space-lg);
+}
+
+.auth-form .form-group-modern label {
+    display: block;
+    margin-bottom: var(--space-xs);
+    font-weight: 600;
+    color: var(--gray-700);
+    font-size: var(--font-size-sm);
+}
+
+.auth-form .form-group-modern input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid var(--gray-200);
+    border-radius: var(--border-radius-md);
+    font-size: var(--font-size-md);
+    transition: all 0.3s;
+    background: var(--gray-50);
+    font-family: var(--font-family);
+}
+
+.auth-form .form-group-modern input:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: var(--white);
+    box-shadow: 0 0 0 4px rgba(44, 122, 123, 0.1);
+}
+
+.auth-form .form-group-modern input::placeholder {
+    color: var(--gray-400);
+}
+
+.btn-auth-primary {
+    width: 100%;
+    padding: 14px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius-md);
+    font-size: var(--font-size-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-family: var(--font-family);
+}
+
+.btn-auth-primary:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.auth-footer {
+    text-align: center;
+    margin-top: var(--space-lg);
+    color: var(--gray-500);
+    font-size: var(--font-size-sm);
+}
+
+.auth-footer a {
+    color: var(--primary);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.auth-footer a:hover {
+    text-decoration: underline;
+}
+
+.demo-accounts {
+    margin-top: var(--space-xl);
+    padding: var(--space-md) var(--space-lg);
+    background: var(--gray-50);
+    border-radius: var(--border-radius-md);
+    font-size: var(--font-size-sm);
+}
+
+.demo-accounts p {
+    font-weight: 600;
+    color: var(--gray-700);
+    margin-bottom: var(--space-sm);
+}
+
+.demo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: var(--space-sm);
+    font-size: var(--font-size-xs);
+}
+
+.demo-grid div span {
+    color: var(--gray-500);
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .auth-card {
+        padding: var(--space-lg);
+    }
+    
+    .demo-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-xs);
+    }
 }
 </style>

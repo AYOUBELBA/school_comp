@@ -1,5 +1,5 @@
 <?php
-// views/products/details.php
+
 
 $product = $product ?? [];
 $images = $images ?? [];
@@ -73,32 +73,41 @@ $isOwner = $user && $user['id'] == $product['seller_id'];
             </div>
             
             <?php if (!$isOwner && $product['status'] === 'active'): ?>
-                <div class="product-actions-details">
-                    <?php if (isset($_SESSION['user_id'])): ?>
-                        <button onclick="makeOffer(<?php echo $product['id']; ?>)" 
-                                class="btn btn-primary" 
-                                <?php echo !$product['is_negotiable'] ? 'disabled' : ''; ?>>
-                            💰 Make Offer
-                        </button>
-                        <a href="/chat?product_id=<?php echo $product['id']; ?>" class="btn btn-secondary">
-                            💬 Contact Seller
-                        </a>
-                        <button onclick="toggleFavorite(<?php echo $product['id']; ?>)" 
-                                class="btn <?php echo $isFavorited ? 'btn-danger' : 'btn-outline'; ?>">
-                            <?php echo $isFavorited ? '❤️ Favorited' : '🤍 Add to Favorites'; ?>
-                        </button>
-                    <?php else: ?>
-                        <a href="/login" class="btn btn-primary">Login to Make Offer</a>
-                        <a href="/register" class="btn btn-secondary">Register</a>
-                    <?php endif; ?>
-                </div>
-            <?php elseif ($isOwner): ?>
-                <div class="product-actions-details">
-                    <a href="/product/edit/<?php echo $product['id']; ?>" class="btn btn-primary">✏️ Edit Listing</a>
-                    <a href="/product/delete/<?php echo $product['id']; ?>" class="btn btn-danger" 
-                       onclick="return confirm('Are you sure you want to delete this listing?')">🗑️ Delete</a>
-                </div>
-            <?php endif; ?>
+    <div class="product-actions-details">
+        <?php if (isset($_SESSION['user_id'])): ?>
+            <!-- Buy Now Button -->
+            <button onclick="buyNow(<?php echo $product['id']; ?>)" 
+                    class="btn btn-success btn-buy-now">
+                ⚡ Buy Now - $<?php echo number_format($product['price'], 2); ?>
+            </button>
+            
+            <!-- Make Offer Button -->
+            <button onclick="makeOffer(<?php echo $product['id']; ?>)" 
+                    class="btn btn-primary" 
+                    <?php echo !$product['is_negotiable'] ? 'disabled' : ''; ?>>
+                💰 Make Offer
+            </button>
+            
+            <a href="/chat/start?product_id=<?php echo $product['id']; ?>" class="btn btn-secondary">
+                💬 Contact Seller
+            </a>
+            
+            <button onclick="toggleFavorite(<?php echo $product['id']; ?>)" 
+                    class="btn <?php echo $isFavorited ? 'btn-danger' : 'btn-outline'; ?>">
+                <?php echo $isFavorited ? '❤️ Favorited' : '🤍 Add to Favorites'; ?>
+            </button>
+        <?php else: ?>
+            <a href="/login" class="btn btn-primary">Login to Buy</a>
+            <a href="/register" class="btn btn-secondary">Register</a>
+        <?php endif; ?>
+    </div>
+<?php elseif ($isOwner): ?>
+    <div class="product-actions-details">
+        <a href="/product/edit/<?php echo $product['id']; ?>" class="btn btn-primary">✏️ Edit Listing</a>
+        <a href="/product/delete/<?php echo $product['id']; ?>" class="btn btn-danger" 
+           onclick="return confirm('Are you sure you want to delete this listing?')">🗑️ Delete</a>
+    </div>
+<?php endif; ?>
         </div>
     </div>
     
@@ -128,27 +137,114 @@ $isOwner = $user && $user['id'] == $product['seller_id'];
 </div>
 
 <!-- Offer Modal -->
-<div id="offerModal" class="modal" style="display: none;">
-    <div class="modal-content">
-        <span class="modal-close" onclick="closeOfferModal()">&times;</span>
-        <h2>Make an Offer</h2>
-        <form id="offerForm" onsubmit="submitOffer(event)">
-            <input type="hidden" id="offerProductId" name="product_id">
-            <div class="form-group">
-                <label for="offeredPrice">Your Offer Price ($)</label>
-                <input type="number" id="offeredPrice" name="offered_price" 
-                       class="form-control" step="0.01" min="0.01" required>
-                <small>Original Price: $<?php echo number_format($product['price'], 2); ?></small>
+<div id="offerModal" class="modal-overlay" style="display: none;">
+    <div class="modal-container">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>💰 Make an Offer</h2>
+                <button class="modal-close" onclick="closeOfferModal()">×</button>
             </div>
-            <div class="form-group">
-                <label for="offerMessage">Message (Optional)</label>
-                <textarea id="offerMessage" name="message" class="form-control" rows="3"></textarea>
+            
+            <div class="modal-body">
+                <div class="offer-product-info">
+                    <div class="offer-product-details">
+                        <h3><?php echo htmlspecialchars($product['title']); ?></h3>
+                        <p class="original-price">Original Price: <strong>$<?php echo number_format($product['price'], 2); ?></strong></p>
+                        <p class="negotiable-status">This item is negotiable</p>
+                    </div>
+                </div>
+                
+                <form id="offerForm" onsubmit="submitOffer(event)">
+                    <input type="hidden" id="offerProductId" name="product_id" value="<?php echo $product['id']; ?>">
+                    
+                    <div class="form-group-modern">
+                        <label for="offeredPrice">Your Offer Price ($)</label>
+                        <input type="number" id="offeredPrice" name="offered_price" 
+                               class="form-control-modern" step="0.01" min="0.01" 
+                               placeholder="Enter your offer amount" required>
+                        <small class="help-text">Enter an amount less than $<?php echo number_format($product['price'], 2); ?></small>
+                    </div>
+                    
+                    <div class="form-group-modern">
+                        <label for="offerMessage">Message to Seller (Optional)</label>
+                        <textarea id="offerMessage" name="message" class="form-control-modern" 
+                                  rows="3" placeholder="Add a personal message to the seller..."></textarea>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button type="button" class="btn-secondary" onclick="closeOfferModal()">Cancel</button>
+                        <button type="submit" class="btn-primary">Submit Offer</button>
+                    </div>
+                </form>
             </div>
-            <button type="submit" class="btn btn-primary">Submit Offer</button>
-        </form>
+        </div>
     </div>
 </div>
-
+<!-- Buy Now Modal -->
+<div id="buyNowModal" class="modal-overlay" style="display: none;">
+    <div class="modal-container">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #38A169 0%, #2F855A 100%);">
+                <h2 style="color: white;">⚡ Confirm Purchase</h2>
+                <button class="modal-close" onclick="closeBuyNowModal()" style="background: rgba(255,255,255,0.2); color: white;">×</button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="buy-product-info">
+                    <div class="buy-product-details">
+                        <h3><?php echo htmlspecialchars($product['title']); ?></h3>
+                        <div class="price-breakdown">
+                            <div class="price-row">
+                                <span>Item Price:</span>
+                                <strong>$<?php echo number_format($product['price'], 2); ?></strong>
+                            </div>
+                            <div class="price-row">
+                                <span>Shipping:</span>
+                                <strong>Free</strong>
+                            </div>
+                            <div class="price-row total">
+                                <span>Total:</span>
+                                <strong>$<?php echo number_format($product['price'], 2); ?></strong>
+                            </div>
+                        </div>
+                        <p class="seller-info">Sold by: <strong><?php echo htmlspecialchars($product['seller_name'] ?? 'Unknown'); ?></strong></p>
+                        <p class="condition-info">Condition: <strong><?php echo ucfirst($product['condition'] ?? 'used'); ?></strong></p>
+                    </div>
+                </div>
+                
+                <form id="buyNowForm" onsubmit="submitBuyNow(event)">
+                    <input type="hidden" id="buyProductId" name="product_id" value="<?php echo $product['id']; ?>">
+                    
+                    <div class="form-group-modern">
+                        <label for="shippingAddress">Shipping Address</label>
+                        <textarea id="shippingAddress" name="shipping_address" class="form-control-modern" 
+                                  rows="3" placeholder="Enter your full shipping address..." required></textarea>
+                    </div>
+                    
+                    <div class="form-group-modern">
+                        <label for="paymentMethod">Payment Method</label>
+                        <select id="paymentMethod" name="payment_method" class="form-control-modern" required>
+                            <option value="">Select payment method</option>
+                            <option value="credit_card">💳 Credit Card</option>
+                            <option value="paypal">💰 PayPal</option>
+                            <option value="bank_transfer">🏦 Bank Transfer</option>
+                            <option value="mobile_money">📱 Mobile Money</option>
+                        </select>
+                    </div>
+                    
+                    <div class="payment-note">
+                        <small>💡 This is a demo. No actual payment will be processed.</small>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button type="button" class="btn-secondary" onclick="closeBuyNowModal()">Cancel</button>
+                        <button type="submit" class="btn-success">Confirm Purchase</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 <script>
 function changeMainImage(element) {
     document.getElementById('mainImage').src = element.src;
@@ -178,17 +274,26 @@ function toggleFavorite(productId) {
 
 function makeOffer(productId) {
     document.getElementById('offerProductId').value = productId;
-    document.getElementById('offerModal').style.display = 'block';
+    document.getElementById('offerModal').classList.add('active');
+    document.getElementById('offerModal').style.display = 'flex';
 }
 
 function closeOfferModal() {
+    document.getElementById('offerModal').classList.remove('active');
     document.getElementById('offerModal').style.display = 'none';
+    document.getElementById('offerForm').reset();
 }
 
 function submitOffer(event) {
     event.preventDefault();
     
-    const formData = new FormData(document.getElementById('offerForm'));
+    const form = document.getElementById('offerForm');
+    const formData = new FormData(form);
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    
+    submitBtn.textContent = 'Submitting...';
+    submitBtn.disabled = true;
     
     fetch('/offer/create', {
         method: 'POST',
@@ -197,353 +302,140 @@ function submitOffer(event) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert('Offer submitted successfully!');
+            Swal.fire({
+                icon: 'success',
+                title: 'Offer Submitted!',
+                text: 'Your offer has been sent to the seller.',
+                confirmButtonColor: '#2C7A7B'
+            });
             closeOfferModal();
         } else {
-            alert('Error: ' + (data.error || data.message || 'Failed to submit offer'));
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: data.error || data.message || 'Failed to submit offer',
+                confirmButtonColor: '#2C7A7B'
+            });
         }
     })
     .catch(error => {
-        alert('Error: ' + error.message);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'An error occurred. Please try again.',
+            confirmButtonColor: '#2C7A7B'
+        });
+        console.error('Error:', error);
+    })
+    .finally(() => {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
     });
 }
 
 // Close modal on click outside
 window.onclick = function(event) {
     const modal = document.getElementById('offerModal');
-    if (event.target == modal) {
+    if (event.target === modal) {
         closeOfferModal();
     }
 }
-</script>
 
-<style>
-.product-details-container {
-    padding: 20px 0;
-}
-
-.product-details {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 40px;
-    background: white;
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.product-gallery {
-    position: sticky;
-    top: 100px;
-}
-
-.main-image {
-    width: 100%;
-    height: 400px;
-    object-fit: contain;
-    background: #f8f9fa;
-    border-radius: 8px;
-    border: 1px solid #eee;
-}
-
-.main-image.placeholder {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #999;
-    font-size: 18px;
-}
-
-.thumbnail-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    margin-top: 10px;
-}
-
-.thumbnail {
-    width: 100%;
-    height: 80px;
-    object-fit: cover;
-    border-radius: 4px;
-    cursor: pointer;
-    border: 2px solid transparent;
-    transition: all 0.3s;
-}
-
-.thumbnail:hover {
-    border-color: #0654ba;
-}
-
-.thumbnail.active {
-    border-color: #0654ba;
-}
-
-.product-info-details {
-    padding: 0 20px;
-}
-
-.product-title-details {
-    font-size: 28px;
-    margin: 0 0 12px 0;
-}
-
-.product-meta {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 16px;
-}
-
-.product-condition-badge {
-    padding: 4px 12px;
-    background: #f0f0f0;
-    border-radius: 12px;
-    font-size: 13px;
-}
-
-.product-status {
-    padding: 4px 12px;
-    border-radius: 12px;
-    font-size: 13px;
-}
-
-.product-status.active {
-    background: #d4edda;
-    color: #155724;
-}
-
-.product-status.sold {
-    background: #f8d7da;
-    color: #721c24;
-}
-
-.product-price-details {
-    font-size: 32px;
-    font-weight: bold;
-    color: #0654ba;
-    margin: 16px 0;
-}
-
-.negotiable-badge {
-    font-size: 14px;
-    background: #fff3cd;
-    color: #856404;
-    padding: 4px 12px;
-    border-radius: 12px;
-    margin-left: 12px;
-}
-
-.product-seller-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px;
-    background: #f8f9fa;
-    border-radius: 8px;
-    margin: 16px 0;
-}
-
-.seller-avatar {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background: #0654ba;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    font-size: 18px;
-}
-
-.seller-name {
-    font-weight: 500;
-}
-
-.seller-rating {
-    font-size: 14px;
-    color: #666;
-}
-
-.product-description-details {
-    margin: 20px 0;
-}
-
-.product-description-details h3 {
-    margin-bottom: 8px;
-}
-
-.product-description-details p {
-    color: #555;
-    line-height: 1.6;
-}
-
-.product-location {
-    color: #666;
-    padding: 8px 0;
-    border-top: 1px solid #eee;
-}
-
-.product-actions-details {
-    display: flex;
-    gap: 12px;
-    margin-top: 20px;
-    flex-wrap: wrap;
-}
-
-.btn {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: all 0.3s;
-    text-decoration: none;
-    display: inline-block;
-}
-
-.btn-primary {
-    background: #0654ba;
-    color: white;
-}
-
-.btn-primary:hover {
-    background: #004b9a;
-}
-
-.btn-secondary {
-    background: #f0f0f0;
-    color: #333;
-}
-
-.btn-secondary:hover {
-    background: #e0e0e0;
-}
-
-.btn-danger {
-    background: #ea4335;
-    color: white;
-}
-
-.btn-danger:hover {
-    background: #d33426;
-}
-
-.btn-outline {
-    background: transparent;
-    color: #0654ba;
-    border: 2px solid #0654ba;
-}
-
-.btn-outline:hover {
-    background: #0654ba;
-    color: white;
-}
-
-.similar-products {
-    margin-top: 40px;
-}
-
-.similar-products h2 {
-    margin-bottom: 20px;
-}
-
-.product-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 20px;
-}
-
-.product-card {
-    background: white;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-.product-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-}
-
-.product-image {
-    width: 100%;
-    height: 150px;
-    object-fit: cover;
-}
-
-.product-image.placeholder {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #f0f0f0;
-    color: #999;
-}
-
-.product-info {
-    padding: 12px;
-}
-
-.product-info h3 {
-    font-size: 14px;
-    margin: 0 0 8px 0;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-.product-price {
-    font-weight: bold;
-    color: #0654ba;
-}
-
-/* Modal */
-.modal {
-    position: fixed;
-    z-index: 1001;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.modal-content {
-    background: white;
-    padding: 30px;
-    border-radius: 8px;
-    max-width: 500px;
-    width: 100%;
-    position: relative;
-}
-
-.modal-close {
-    position: absolute;
-    right: 20px;
-    top: 10px;
-    font-size: 28px;
-    cursor: pointer;
-    color: #999;
-}
-
-.modal-close:hover {
-    color: #333;
-}
-
-@media (max-width: 768px) {
-    .product-details {
-        grid-template-columns: 1fr;
+// Close modal on ESC key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeOfferModal();
     }
+});
+
+// buy now script
+
+function buyNow(productId) {
+    document.getElementById('buyProductId').value = productId;
+    document.getElementById('buyNowModal').classList.add('active');
+    document.getElementById('buyNowModal').style.display = 'flex';
+}
+
+function closeBuyNowModal() {
+    document.getElementById('buyNowModal').classList.remove('active');
+    document.getElementById('buyNowModal').style.display = 'none';
+    document.getElementById('buyNowForm').reset();
+}
+
+function submitBuyNow(event) {
+    event.preventDefault();
     
-    .product-gallery {
-        position: relative;
-        top: 0;
+    const form = document.getElementById('buyNowForm');
+    const formData = new FormData(form);
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    
+    // Show loading state
+    submitBtn.textContent = 'Processing...';
+    submitBtn.disabled = true;
+    
+    fetch('/order/create', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Purchase Successful! 🎉',
+                text: 'Your order has been placed. You will receive a confirmation email shortly.',
+                confirmButtonColor: '#38A169',
+                timer: 5000,
+                timerProgressBar: true
+            });
+            closeBuyNowModal();
+            // Optionally redirect to orders page
+            setTimeout(() => {
+                window.location.href = '/orders';
+            }, 2000);
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Purchase Failed',
+                text: data.error || data.message || 'Failed to process your order',
+                confirmButtonColor: '#38A169'
+            });
+        }
+    })
+    .catch(error => {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'An error occurred. Please try again.',
+            confirmButtonColor: '#38A169'
+        });
+        console.error('Error:', error);
+    })
+    .finally(() => {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+    });
+}
+
+// Close buy modal on click outside
+window.onclick = function(event) {
+    const offerModal = document.getElementById('offerModal');
+    const buyModal = document.getElementById('buyNowModal');
+    
+    if (event.target === offerModal) {
+        closeOfferModal();
+    }
+    if (event.target === buyModal) {
+        closeBuyNowModal();
     }
 }
-</style>
+
+// Close modals on ESC key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeOfferModal();
+        closeBuyNowModal();
+    }
+});
+</script>

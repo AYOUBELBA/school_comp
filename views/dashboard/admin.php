@@ -39,11 +39,11 @@ $recentProducts = $recentProducts ?? [];
     
     <!-- Quick Actions -->
     <div class="quick-actions">
-        <a href="/admin/users" class="btn btn-primary">👥 Manage Users</a>
-        <a href="/admin/products" class="btn btn-secondary">📦 Moderate Products</a>
+        <a href="/admin/products" class="btn btn-primary">📦 Manage Products</a>
+        <a href="/admin/users" class="btn btn-secondary">👥 Manage Users</a>
         <a href="/admin/orders" class="btn btn-secondary">📋 View Orders</a>
     </div>
-    
+        
     <!-- Recent Users -->
     <section class="dashboard-section">
         <h2>Recent Users</h2>
@@ -68,7 +68,7 @@ $recentProducts = $recentProducts ?? [];
                             <td><span class="role-badge role-<?php echo $user['role']; ?>"><?php echo ucfirst($user['role']); ?></span></td>
                             <td><?php echo date('M d, Y', strtotime($user['created_at'])); ?></td>
                             <td>
-                                <a href="/admin/user/edit/<?php echo $user['id']; ?>" class="btn-small">Edit</a>
+                                <a href="/admin/users" class="btn-small">Edit</a>
                             </td>
                         </tr>
                     <?php endforeach; ?>

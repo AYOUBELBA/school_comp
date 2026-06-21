@@ -26,39 +26,48 @@ class AuthController extends Controller
         $this->view('auth/login');
     }
     
-    public function authenticate()
-    {
-        $email = $_POST['email'] ?? '';
-        $password = $_POST['password'] ?? '';
-        
-        if (empty($email) || empty($password)) {
-            return $this->redirect('/login', ['error' => 'Please fill in all fields']);
-        }
-        
-        $user = $this->db->fetch(
-            "SELECT * FROM users WHERE email = ?",
-            [$email]
-        );
-        
-        if (!$user || !Auth::verifyPassword($password, $user['password'])) {
-            return $this->redirect('/login', ['error' => 'Invalid email or password']);
-        }
-        
-        Auth::login($user);
-        
-        // Redirect based on role
-        $redirect = '/';
-        if ($user['role'] === 'admin') {
-            $redirect = '/admin';
-        } elseif ($user['role'] === 'seller') {
-            $redirect = '/dashboard/seller';
-        } else {
-            $redirect = '/dashboard/buyer';
-        }
-        
-        return $this->redirect($redirect, ['success' => 'Welcome back, ' . $user['full_name'] . '!']);
+public function authenticate()
+{
+    $email = $_POST['email'] ?? '';
+    $password = $_POST['password'] ?? '';
+    
+    if (empty($email) || empty($password)) {
+        return $this->redirect('/login', ['error' => 'Please fill in all fields']);
     }
     
+    $user = $this->db->fetch(
+        "SELECT * FROM users WHERE email = ?",
+        [$email]
+    );
+    
+    if (!$user) {
+        return $this->redirect('/login', ['error' => 'Invalid email or password']);
+    }
+    
+    // Check if user is banned
+    if ($user['is_banned'] ?? false) {
+        $banReason = $user['ban_reason'] ?? 'No reason provided';
+        return $this->redirect('/login', ['error' => 'Your account has been banned. Reason: ' . $banReason]);
+    }
+    
+    if (!Auth::verifyPassword($password, $user['password'])) {
+        return $this->redirect('/login', ['error' => 'Invalid email or password']);
+    }
+    
+    Auth::login($user);
+    
+    // Redirect based on role
+    $redirect = '/';
+    if ($user['role'] === 'admin') {
+        $redirect = '/admin/products';
+    } elseif ($user['role'] === 'seller') {
+        $redirect = '/dashboard/seller';
+    } else {
+        $redirect = '/dashboard/buyer';
+    }
+    
+    return $this->redirect($redirect, ['success' => 'Welcome back, ' . $user['full_name'] . '!']);
+}
     public function register()
     {
         if (Auth::isLoggedIn()) {
