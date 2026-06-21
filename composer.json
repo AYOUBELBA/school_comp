@@ -1,0 +1,29 @@
+{
+    "name": "marketplace/market",
+    "description": "Ebay-style marketplace with real-time chat and offer system",
+    "type": "project",
+    "license": "MIT",
+    "minimum-stability": "stable",
+    "require": {
+        "php": ">=7.4",
+        "cboden/ratchet": "^0.4",
+        "react/event-loop": "^1.2",
+        "react/socket": "^1.12"
+    },
+    "require-dev": {
+        "symfony/var-dumper": "^5.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Core\\": "src/Core/",
+            "Controllers\\": "src/Controllers/",
+            "Models\\": "src/Models/",
+            "Services\\": "src/Services/",
+            "Middleware\\": "src/Middleware/",
+            "WebSocket\\": "src/WebSocket/"
+        }
+    },
+    "scripts": {
+        "start-websocket": "php bin/chat-server.php"
+    }
+}
